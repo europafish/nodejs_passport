@@ -1,0 +1,30 @@
+extends ../layout
+include ../mixins/pagination
+block content
+  div
+    h1= user ? `${user.name}의 글 목록` : '전체 글 목록'
+      a(href="/logout"): button 로그아웃
+  table
+    thead
+      tr
+        td 페이지 당 게시글 수
+        td(colspan="2")
+          select(onChange="window.location.href=this.value")
+            option(value=`${path}?perPage=10` selected= perPage == 10) 10
+            option(value=`${path}?perPage=20` selected= perPage == 20) 20
+            option(value=`${path}?perPage=50` selected= perPage == 50) 50
+            option(value=`${path}?perPage=100` selected= perPage == 100) 100
+    tbody
+      each post in posts
+        tr
+          td: a(href="/posts/"+post.shortId)= post.title
+          td: a(href=`/users/${post.author.shortId}/posts`)= post.author.name
+          td= formatDate(post.createdAt)
+    tfoot 
+      tr 
+        td(colspan="3")
+          +pagination(path)
+  if user
+    a(href="/posts"): button 전체 글 목록
+  else
+    a(href="/posts?write=true"): button 등록하기

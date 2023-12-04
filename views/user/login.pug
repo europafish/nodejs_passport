@@ -1,0 +1,35 @@
+extends ../layout
+block content
+  form(action="/auth" method="post" onsubmit="return check()")
+    table
+      tbody
+        tr
+          td 이메일
+          td: input(type="text" name="email")
+        tr
+          td 비밀번호
+          td: input(type="password" name="password")
+        tr
+          td: input(type="submit" value="로그인")
+          td: a(href="/join")
+            button(type="button") 회원가입
+        tr
+          td(colspan="2"): a(href="/auth/google")
+            button(type="button") 구글 로그인
+        tr
+          td(colspan="2"): a(href="/reset-password")
+            button(type="button") 비밀번호 찾기
+  script.
+    function check() {
+      const email = document.querySelector('[name="email"]').value
+      if (!email) {
+         alert("이메일을 입력 해 주세요");
+         return false;
+      }
+      const password = document.querySelector('[name="password"]').value
+      if (!password) {
+         alert("비밀번호를 입력 해 주세요");
+         return false;
+      }
+      return true;
+    }

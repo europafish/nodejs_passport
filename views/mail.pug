@@ -1,0 +1,10 @@
+extends layout
+block content
+  form(action="/send-message" method="post")
+    table
+      tbody
+        tr
+          td 이메일
+          td: input(type="text" name="email")
+        tr
+          td(colspan="2"): input(type="submit" value="메일 발송")

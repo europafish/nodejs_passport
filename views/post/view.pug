@@ -1,0 +1,94 @@
+extends ../layout
+
+block content
+  h1= post.title
+  table
+    tbody
+      tr
+        th= post.author.name
+        th(colspan="2")= formatDate(post.createdAt)
+      tr
+        td(colspan="3")
+          pre= post.content
+      tr
+        td: a(href="/posts"): button 목록으로
+        td: a(href="?edit=true"): button 수정
+        td: button.delete(onclick='deletePost()') 삭제
+  h3 댓글
+  table
+    thead
+      tr 
+        td(colspan="2"): input#content(type="text")
+        td(onclick="writeComment()"): button 댓글 작성
+    tbody#comments
+  template#comment-template
+    tr
+      td.content
+      td.author
+      td.createdAt
+  
+  script(type="text/javascript").
+    loadComments();
+    
+    function deletePost() {
+      fetch('/posts/#{post.shortId}', { method: 'delete', credentials: 'include' })
+        .then((res) => {
+          if (res.ok) {
+            alert('삭제되었습니다.');
+            window.location.href = '/posts';
+          } else {
+            alert('오류가 발생했습니다.');
+          }
+        })
+        .catch((err) => {
+          alert('오류가 발생했습니다.');
+        });
+    }
+    
+    function loadComments() {
+      document.querySelector('#comments').innerHTML = '';
+
+      fetch('/api/posts/#{post.shortId}/comments', { credentials: 'include' })
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            throw new Error('댓글을 불러오지 못했습니다');
+          }
+        })
+        .then((comments) => {
+          comments.forEach(addComment);
+        })
+        .catch((err) => alert(err.message));
+    }
+
+    function addComment(comment) {
+      const template = document.querySelector('#comment-template');
+      const node = document.importNode(template.content, true);
+      
+      node.querySelector('.content').textContent = comment.content;
+      node.querySelector('.author').textContent = comment.author.name;
+      node.querySelector('.createdAt').textContent = comment.createdAt;
+      document.querySelector('#comments').appendChild(node);
+    }
+    
+    function writeComment() {
+      const input = document.querySelector('#content');
+      const content = input.value;
+
+      fetch('/api/posts/#{post.shortId}/comments', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ content }),
+      }).then((res) => {
+        if (res.ok) {
+          input.value = ""
+          loadComments();
+        } else {
+          alert('오류가 발생했습니다.');
+        }
+      });
+    }
